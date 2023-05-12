@@ -1,0 +1,9 @@
+{
+	"name": "COEDataBricksPOC",
+	"location": "centralus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "42680d74-2cd4-449d-af8a-e37bb8d23935",
+		"tenantId": "1f2b5de9-e9dd-419a-ade5-fee6c92e7f92"
+	}
+}
