@@ -21,7 +21,7 @@
 							"value": "@pipeline().DataFactory",
 							"type": "Expression"
 						},
-						"schemaName": "Process",
+						"schemaName": "Bronze",
 						"endingActivity": "ENT_InsertIntoAgingSilver",
 						"startingActivity": "ENT_InsertIntoAgingBronze",
 						"Pipeline": {
