@@ -1,0 +1,250 @@
+-- Databricks notebook source
+-- MAGIC %python
+-- MAGIC Query = """
+-- MAGIC MERGE INTO Isurance_Gold AS IG 
+-- MAGIC USING 
+-- MAGIC ( 
+-- MAGIC           SELECT 
+-- MAGIC           A.AGENCY_ID					
+-- MAGIC           ,A.PRIMARY_AGENCY_ID        
+-- MAGIC           ,A.PROD_ABBR                
+-- MAGIC           ,A.PROD_LINE                
+-- MAGIC           ,A.STATE_ABBR               
+-- MAGIC           ,A.STAT_PROFILE_DATE_YEAR   
+-- MAGIC           ,RETENTION_POLY_QTY       
+-- MAGIC           ,POLY_INFORCE_QTY         
+-- MAGIC           ,PREV_POLY_INFORCE_QTY    
+-- MAGIC           ,NB_WRTN_PREM_AMT         
+-- MAGIC           ,WRTN_PREM_AMT            
+-- MAGIC           ,PREV_WRTN_PREM_AMT       
+-- MAGIC           ,PRD_ERND_PREM_AMT        
+-- MAGIC           ,PRD_INCRD_LOSSES_AMT     
+-- MAGIC           ,MONTHS                   
+-- MAGIC           ,RETENTION_RATIO          
+-- MAGIC           ,LOSS_RATIO               
+-- MAGIC           ,LOSS_RATIO_3YR           
+-- MAGIC           ,GROWTH_RATE_3YR          
+-- MAGIC           ,AGENCY_APPOINTMENT_YEAR  
+-- MAGIC           ,ACTIVE_PRODUCERS         
+-- MAGIC           ,MAX_AGE                  
+-- MAGIC           ,MIN_AGE                  
+-- MAGIC           ,VENDOR_IND               
+-- MAGIC           ,VENDOR                   
+-- MAGIC           ,PL_START_YEAR            
+-- MAGIC           ,PL_END_YEAR              
+-- MAGIC           ,COMMISIONS_START_YEAR    
+-- MAGIC           ,COMMISIONS_END_YEAR      
+-- MAGIC           ,CL_START_YEAR            
+-- MAGIC           ,CL_END_YEAR              
+-- MAGIC           ,ACTIVITY_NOTES_START_YEAR
+-- MAGIC           ,ACTIVITY_NOTES_END_YEAR  
+-- MAGIC           ,CL_BOUND_CT_MDS          
+-- MAGIC           ,CL_QUO_CT_MDS            
+-- MAGIC           ,CL_BOUND_CT_SBZ          
+-- MAGIC           ,CL_QUO_CT_SBZ            
+-- MAGIC           ,CL_BOUND_CT_eQT          
+-- MAGIC           ,CL_QUO_CT_eQT            
+-- MAGIC           ,PL_BOUND_CT_ELINKS       
+-- MAGIC           ,PL_QUO_CT_ELINKS         
+-- MAGIC           ,PL_BOUND_CT_PLRANK       
+-- MAGIC           ,PL_QUO_CT_PLRANK         
+-- MAGIC           ,PL_BOUND_CT_eQTte        
+-- MAGIC           ,PL_QUO_CT_eQTte          
+-- MAGIC           ,PL_BOUND_CT_APPLIED      
+-- MAGIC           ,PL_QUO_CT_APPLIED        
+-- MAGIC           ,PL_BOUND_CT_TRANSACTNOW  
+-- MAGIC           ,PL_QUO_CT_TRANSACTNOW    
+-- MAGIC           ,A.CreatedBy                      
+-- MAGIC           ,A.CreatedDate                    
+-- MAGIC
+-- MAGIC           FROM PolicyAging_Silver AS A
+-- MAGIC           Left JOIN PolicyInfo_Silver AS I 
+-- MAGIC           ON A. AGENCY_ID              =   I.AGENCY_ID  AND 
+-- MAGIC             A.PRIMARY_AGENCY_ID       =   I.PRIMARY_AGENCY_ID  AND 
+-- MAGIC             A.PROD_ABBR               =   I.PROD_ABBR  AND 
+-- MAGIC             A.STATE_ABBR              =   I.STATE_ABBR  AND 
+-- MAGIC             A.STAT_PROFILE_DATE_YEAR  =   I.STAT_PROFILE_DATE_YEAR 
+-- MAGIC           LEFT JOIN TransactionGrowthRate_Silver  AS T 
+-- MAGIC           ON A. AGENCY_ID              =   T.AGENCY_ID  AND 
+-- MAGIC             A.PRIMARY_AGENCY_ID       =   T.PRIMARY_AGENCY_ID  AND 
+-- MAGIC             A.PROD_ABBR               =   T.PROD_ABBR  AND 
+-- MAGIC             A.STATE_ABBR              =   T.STATE_ABBR  AND 
+-- MAGIC             A.STAT_PROFILE_DATE_YEAR  =   T.STAT_PROFILE_DATE_YEAR 
+-- MAGIC )  AS C
+-- MAGIC      ON IG. AGENCY_ID              =  C.AGENCY_ID  AND 
+-- MAGIC         IG.PRIMARY_AGENCY_ID       =   C.PRIMARY_AGENCY_ID  AND 
+-- MAGIC         IG.PROD_ABBR               =   C.PROD_ABBR  AND 
+-- MAGIC         IG.STATE_ABBR              =   C.STATE_ABBR  AND 
+-- MAGIC         IG.STAT_PROFILE_DATE_YEAR  =   C.STAT_PROFILE_DATE_YEAR 
+-- MAGIC WHEN MATCHED THEN  
+-- MAGIC UPDATE SET 	 NB_WRTN_PREM_AMT          = C.NB_WRTN_PREM_AMT          
+-- MAGIC     ,WRTN_PREM_AMT             = C.WRTN_PREM_AMT             
+-- MAGIC     ,PREV_WRTN_PREM_AMT        = C.PREV_WRTN_PREM_AMT        
+-- MAGIC     ,PRD_ERND_PREM_AMT         = C.PRD_ERND_PREM_AMT         
+-- MAGIC     ,PRD_INCRD_LOSSES_AMT      = C.PRD_INCRD_LOSSES_AMT      
+-- MAGIC     ,MONTHS                    = C.MONTHS                    
+-- MAGIC     ,RETENTION_RATIO           = C.RETENTION_RATIO           
+-- MAGIC     ,LOSS_RATIO                = C.LOSS_RATIO                
+-- MAGIC     ,LOSS_RATIO_3YR            = C.LOSS_RATIO_3YR            
+-- MAGIC     ,GROWTH_RATE_3YR           = C.GROWTH_RATE_3YR           
+-- MAGIC     ,AGENCY_APPOINTMENT_YEAR   = C.AGENCY_APPOINTMENT_YEAR   
+-- MAGIC     ,ACTIVE_PRODUCERS          = C.ACTIVE_PRODUCERS          
+-- MAGIC     ,MAX_AGE                   = C.MAX_AGE                   
+-- MAGIC     ,MIN_AGE                   = C.MIN_AGE                   
+-- MAGIC     ,VENDOR_IND                = C.VENDOR_IND                
+-- MAGIC     ,VENDOR                    = C.VENDOR                    
+-- MAGIC     ,PL_START_YEAR             = C.PL_START_YEAR             
+-- MAGIC     ,PL_END_YEAR               = C.PL_END_YEAR               
+-- MAGIC     ,COMMISIONS_START_YEAR     = C.COMMISIONS_START_YEAR     
+-- MAGIC     ,COMMISIONS_END_YEAR       = C.COMMISIONS_END_YEAR       
+-- MAGIC     ,CL_START_YEAR             = C.CL_START_YEAR             
+-- MAGIC     ,CL_END_YEAR               = C.CL_END_YEAR               
+-- MAGIC     ,ACTIVITY_NOTES_START_YEAR = C.ACTIVITY_NOTES_START_YEAR 
+-- MAGIC     ,ACTIVITY_NOTES_END_YEAR   = C.ACTIVITY_NOTES_END_YEAR   
+-- MAGIC     ,CL_BOUND_CT_MDS           = C.CL_BOUND_CT_MDS           
+-- MAGIC     ,CL_QUO_CT_MDS             = C.CL_QUO_CT_MDS             
+-- MAGIC     ,CL_BOUND_CT_SBZ           = C.CL_BOUND_CT_SBZ           
+-- MAGIC     ,CL_QUO_CT_SBZ             = C.CL_QUO_CT_SBZ             
+-- MAGIC     ,CL_BOUND_CT_eQT           = C.CL_BOUND_CT_eQT           
+-- MAGIC     ,CL_QUO_CT_eQT             = C.CL_QUO_CT_eQT             
+-- MAGIC     ,PL_BOUND_CT_ELINKS        = C.PL_BOUND_CT_ELINKS        
+-- MAGIC     ,PL_QUO_CT_ELINKS          = C.PL_QUO_CT_ELINKS          
+-- MAGIC     ,PL_BOUND_CT_PLRANK        = C.PL_BOUND_CT_PLRANK        
+-- MAGIC     ,PL_QUO_CT_PLRANK          = C.PL_QUO_CT_PLRANK          
+-- MAGIC     ,PL_BOUND_CT_eQTte         = C.PL_BOUND_CT_eQTte         
+-- MAGIC     ,PL_QUO_CT_eQTte           = C.PL_QUO_CT_eQTte           
+-- MAGIC     ,PL_BOUND_CT_APPLIED       = C.PL_BOUND_CT_APPLIED       
+-- MAGIC     ,PL_QUO_CT_APPLIED         = C.PL_QUO_CT_APPLIED         
+-- MAGIC     ,PL_BOUND_CT_TRANSACTNOW   = C.PL_BOUND_CT_TRANSACTNOW   
+-- MAGIC     ,PL_QUO_CT_TRANSACTNOW     = C.PL_QUO_CT_TRANSACTNOW     
+-- MAGIC     ,UpdatedBy                 = C.CreatedBy
+-- MAGIC     ,UpdatedDate               = C.CreatedDate
+-- MAGIC WHEN NOT MATCHED
+-- MAGIC THEN INSERT
+-- MAGIC (
+-- MAGIC              AGENCY_ID					
+-- MAGIC           ,PRIMARY_AGENCY_ID        
+-- MAGIC           ,PROD_ABBR                
+-- MAGIC           ,PROD_LINE                
+-- MAGIC           ,STATE_ABBR               
+-- MAGIC           ,STAT_PROFILE_DATE_YEAR   
+-- MAGIC           ,RETENTION_POLY_QTY       
+-- MAGIC           ,POLY_INFORCE_QTY         
+-- MAGIC           ,PREV_POLY_INFORCE_QTY    
+-- MAGIC           ,NB_WRTN_PREM_AMT         
+-- MAGIC           ,WRTN_PREM_AMT            
+-- MAGIC           ,PREV_WRTN_PREM_AMT       
+-- MAGIC           ,PRD_ERND_PREM_AMT        
+-- MAGIC           ,PRD_INCRD_LOSSES_AMT     
+-- MAGIC           ,MONTHS                   
+-- MAGIC           ,RETENTION_RATIO          
+-- MAGIC           ,LOSS_RATIO               
+-- MAGIC           ,LOSS_RATIO_3YR           
+-- MAGIC           ,GROWTH_RATE_3YR          
+-- MAGIC           ,AGENCY_APPOINTMENT_YEAR  
+-- MAGIC           ,ACTIVE_PRODUCERS         
+-- MAGIC           ,MAX_AGE                  
+-- MAGIC           ,MIN_AGE                  
+-- MAGIC           ,VENDOR_IND               
+-- MAGIC           ,VENDOR                   
+-- MAGIC           ,PL_START_YEAR            
+-- MAGIC           ,PL_END_YEAR              
+-- MAGIC           ,COMMISIONS_START_YEAR    
+-- MAGIC           ,COMMISIONS_END_YEAR      
+-- MAGIC           ,CL_START_YEAR            
+-- MAGIC           ,CL_END_YEAR              
+-- MAGIC           ,ACTIVITY_NOTES_START_YEAR
+-- MAGIC           ,ACTIVITY_NOTES_END_YEAR  
+-- MAGIC           ,CL_BOUND_CT_MDS          
+-- MAGIC           ,CL_QUO_CT_MDS            
+-- MAGIC           ,CL_BOUND_CT_SBZ          
+-- MAGIC           ,CL_QUO_CT_SBZ            
+-- MAGIC           ,CL_BOUND_CT_eQT          
+-- MAGIC           ,CL_QUO_CT_eQT            
+-- MAGIC           ,PL_BOUND_CT_ELINKS       
+-- MAGIC           ,PL_QUO_CT_ELINKS         
+-- MAGIC           ,PL_BOUND_CT_PLRANK       
+-- MAGIC           ,PL_QUO_CT_PLRANK         
+-- MAGIC           ,PL_BOUND_CT_eQTte        
+-- MAGIC           ,PL_QUO_CT_eQTte          
+-- MAGIC           ,PL_BOUND_CT_APPLIED      
+-- MAGIC           ,PL_QUO_CT_APPLIED        
+-- MAGIC           ,PL_BOUND_CT_TRANSACTNOW  
+-- MAGIC           ,PL_QUO_CT_TRANSACTNOW    
+-- MAGIC           ,CreatedBy                      
+-- MAGIC           ,CreatedDate                    
+-- MAGIC
+-- MAGIC )
+-- MAGIC VALUES 
+-- MAGIC (
+-- MAGIC              AGENCY_ID					
+-- MAGIC           ,PRIMARY_AGENCY_ID        
+-- MAGIC           ,PROD_ABBR                
+-- MAGIC           ,PROD_LINE                
+-- MAGIC           ,STATE_ABBR               
+-- MAGIC           ,STAT_PROFILE_DATE_YEAR   
+-- MAGIC           ,RETENTION_POLY_QTY       
+-- MAGIC           ,POLY_INFORCE_QTY         
+-- MAGIC           ,PREV_POLY_INFORCE_QTY    
+-- MAGIC           ,NB_WRTN_PREM_AMT         
+-- MAGIC           ,WRTN_PREM_AMT            
+-- MAGIC           ,PREV_WRTN_PREM_AMT       
+-- MAGIC           ,PRD_ERND_PREM_AMT        
+-- MAGIC           ,PRD_INCRD_LOSSES_AMT     
+-- MAGIC           ,MONTHS                   
+-- MAGIC           ,RETENTION_RATIO          
+-- MAGIC           ,LOSS_RATIO               
+-- MAGIC           ,LOSS_RATIO_3YR           
+-- MAGIC           ,GROWTH_RATE_3YR          
+-- MAGIC           ,AGENCY_APPOINTMENT_YEAR  
+-- MAGIC           ,ACTIVE_PRODUCERS         
+-- MAGIC           ,MAX_AGE                  
+-- MAGIC           ,MIN_AGE                  
+-- MAGIC           ,VENDOR_IND               
+-- MAGIC           ,VENDOR                   
+-- MAGIC           ,PL_START_YEAR            
+-- MAGIC           ,PL_END_YEAR              
+-- MAGIC           ,COMMISIONS_START_YEAR    
+-- MAGIC           ,COMMISIONS_END_YEAR      
+-- MAGIC           ,CL_START_YEAR            
+-- MAGIC           ,CL_END_YEAR              
+-- MAGIC           ,ACTIVITY_NOTES_START_YEAR
+-- MAGIC           ,ACTIVITY_NOTES_END_YEAR  
+-- MAGIC           ,CL_BOUND_CT_MDS          
+-- MAGIC           ,CL_QUO_CT_MDS            
+-- MAGIC           ,CL_BOUND_CT_SBZ          
+-- MAGIC           ,CL_QUO_CT_SBZ            
+-- MAGIC           ,CL_BOUND_CT_eQT          
+-- MAGIC           ,CL_QUO_CT_eQT            
+-- MAGIC           ,PL_BOUND_CT_ELINKS       
+-- MAGIC           ,PL_QUO_CT_ELINKS         
+-- MAGIC           ,PL_BOUND_CT_PLRANK       
+-- MAGIC           ,PL_QUO_CT_PLRANK         
+-- MAGIC           ,PL_BOUND_CT_eQTte        
+-- MAGIC           ,PL_QUO_CT_eQTte          
+-- MAGIC           ,PL_BOUND_CT_APPLIED      
+-- MAGIC           ,PL_QUO_CT_APPLIED        
+-- MAGIC           ,PL_BOUND_CT_TRANSACTNOW  
+-- MAGIC           ,PL_QUO_CT_TRANSACTNOW    
+-- MAGIC           ,CreatedBy                      
+-- MAGIC           ,CreatedDate                    
+-- MAGIC
+-- MAGIC
+-- MAGIC )"""
+
+-- COMMAND ----------
+
+-- MAGIC %python 
+-- MAGIC were_errors = False 
+-- MAGIC try:
+-- MAGIC     spark.sql(Query)
+-- MAGIC except Exception as e:
+-- MAGIC     were_errors = true
+-- MAGIC # if were_errors:
+-- MAGIC #   log failure # you can use data from results variable
+
+-- COMMAND ----------
+
+-- MAGIC %sql
+-- MAGIC select * from Isurance_Gold
+-- MAGIC limit 100
