@@ -251,7 +251,7 @@
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
 							"type": "Expression"
 						},
-						"Error": ""
+						"Error": "null"
 					}
 				},
 				"linkedServiceName": {
