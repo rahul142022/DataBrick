@@ -1,6 +1,135 @@
 {
 	"name": "InsuranceAging",
 	"properties": {
+		"activities": [
+			{
+				"name": "ENT_InsertLogTaskControlflow",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Customers/Process/SP/InsertLogTaskcontrolFlow",
+					"baseParameters": {
+						"dataFactory": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"schemaName": "Process",
+						"endingActivity": "ENT_InsertIntoAgingSilver",
+						"startingActivity": "ENT_InsertIntoAgingBronze",
+						"Pipeline": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"Status": "InProgress"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ENT_InsertIntoPolicyAging_Bronze",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ENT_InsertLogTaskControlflow",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Insurance/Bronze/SP/InsertIntoPolicyAging_Bronze",
+					"baseParameters": {
+						"CreatedBy": {
+							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ENT_GovernanceRulesForPolicyAging",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ENT_InsertIntoPolicyAging_Bronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Insurance/Silver/SP/GovernanceRulesForPolicyAging"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ENT_MergePoliciyAging",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "ENT_GovernanceRulesForPolicyAging",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Insurance/Silver/SP/MergePoliciyAging"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"LogTaskControlFlowKey": {
+				"type": "String",
+				"defaultValue": "123"
+			}
+		},
 		"annotations": []
 	}
 }
