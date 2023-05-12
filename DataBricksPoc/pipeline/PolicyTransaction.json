@@ -1,0 +1,146 @@
+{
+	"name": "PolicyTransaction",
+	"properties": {
+		"activities": [
+			{
+				"name": "InsertLogtaskControlFlow",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Customers/Process/SP/InsertLogTaskcontrolFlow",
+					"baseParameters": {
+						"dataFactory": {
+							"value": "@pipeline().DataFactory",
+							"type": "Expression"
+						},
+						"Pipeline": {
+							"value": "@pipeline().Pipeline",
+							"type": "Expression"
+						},
+						"startingActivity": "InsertLogtaskControlFlow",
+						"endingActivity": "InsertLogtaskControlFlow",
+						"Status": "InProgress",
+						"schemaName": {
+							"value": "@pipeline().parameters.schemaName",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PolicyTransactionBronze",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "InsertLogtaskControlFlow",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Insurance/Bronze/SP/InsertTransactionGrowthRate_Bronze",
+					"baseParameters": {
+						"CreatedBy": {
+							"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Governancerule",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "PolicyTransactionBronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Insurance/Silver/SP/GovernanaceRulesforTransaction"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "PolicyTransactionSilver",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Governancerule",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Shared/Insurance/Silver/SP/MergeTransaction"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksPoc",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"schemaName": {
+				"type": "string",
+				"defaultValue": "Process"
+			}
+		},
+		"variables": {
+			"LogtaskControlFlowKey": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "DataBricksPOCPipelines"
+		},
+		"annotations": []
+	}
+}
