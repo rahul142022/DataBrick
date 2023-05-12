@@ -1,5 +1,5 @@
 {
-	"name": "PolicyTransaction",
+	"name": "PL_PolicyTransaction",
 	"properties": {
 		"activities": [
 			{
@@ -266,7 +266,7 @@
 		"parameters": {
 			"schemaName": {
 				"type": "string",
-				"defaultValue": "Process"
+				"defaultValue": "Silver"
 			}
 		},
 		"variables": {
