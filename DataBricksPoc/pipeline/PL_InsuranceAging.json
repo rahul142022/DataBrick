@@ -266,6 +266,9 @@
 				"defaultValue": "123"
 			}
 		},
+		"folder": {
+			"name": "DataBricksPOCPipelines"
+		},
 		"annotations": []
 	}
 }
