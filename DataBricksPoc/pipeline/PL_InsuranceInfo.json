@@ -37,7 +37,7 @@
 				}
 			},
 			{
-				"name": "ENT_InsertIntoPolicyAging_Bronze",
+				"name": "ENT_InsertIntoPolicyInfo_Bronze",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
@@ -74,7 +74,7 @@
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ENT_InsertIntoPolicyAging_Bronze",
+						"activity": "ENT_InsertIntoPolicyInfo_Bronze",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -128,7 +128,7 @@
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ENT_InsertIntoPolicyAging_Bronze",
+						"activity": "ENT_InsertIntoPolicyInfo_Bronze",
 						"dependencyConditions": [
 							"Failed"
 						]
