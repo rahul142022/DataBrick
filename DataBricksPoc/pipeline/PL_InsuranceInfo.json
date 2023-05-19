@@ -70,7 +70,7 @@
 				}
 			},
 			{
-				"name": "ENT_GovernanceRulesForPolicyAging",
+				"name": "ENT_GovernanceRulesForPolicyInfo",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
@@ -97,11 +97,11 @@
 				}
 			},
 			{
-				"name": "ENT_MergePoliciyAging",
+				"name": "ENT_MergePolicyInfo",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ENT_GovernanceRulesForPolicyAging",
+						"activity": "ENT_GovernanceRulesForPolicyInfo",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -124,7 +124,7 @@
 				}
 			},
 			{
-				"name": "ENT_InsertIntoPolicyAging_Bronze_Failed",
+				"name": "ENT_InsertIntoPolicyInfo_Bronze_Failed",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
@@ -158,11 +158,11 @@
 				}
 			},
 			{
-				"name": "ENT_GovernanceRulesForPolicyAging_Failed",
+				"name": "ENT_GovernanceRulesForPolicyInfo_Failed",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ENT_GovernanceRulesForPolicyAging",
+						"activity": "ENT_GovernanceRulesForPolicyInfo",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -192,11 +192,11 @@
 				}
 			},
 			{
-				"name": "ENT_MergePoliciyAging_Failed",
+				"name": "ENT_MergePolicyInfo_Failed",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ENT_MergePoliciyAging",
+						"activity": "ENT_MergePolicyInfo",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -226,11 +226,11 @@
 				}
 			},
 			{
-				"name": "ENT_MergePoliciyAging_Success",
+				"name": "ENT_MergePolicyInfo_Success",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "ENT_MergePoliciyAging",
+						"activity": "ENT_MergePolicyInfo",
 						"dependencyConditions": [
 							"Succeeded"
 						]
