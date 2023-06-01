@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Customers/Process/SP/InsertLogTaskcontrolFlow",
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
 					"baseParameters": {
 						"dataFactory": {
 							"value": "@pipeline().DataFactory",
@@ -56,7 +56,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Insurance/Bronze/SP/InsertIntoPolicyAging_Bronze",
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Insurance/Bronze/SP/InsertIntoPolicyAging_Bronze",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -89,7 +89,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Insurance/Silver/SP/GovernanceRulesForPolicyAging"
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Insurance/Silver/SP/GovernanceRulesForPolicyAging"
 				},
 				"linkedServiceName": {
 					"referenceName": "AzureDatabricksPoc",
@@ -116,7 +116,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Insurance/Silver/SP/MergePoliciyAging"
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Insurance/Silver/SP/MergePoliciyAging"
 				},
 				"linkedServiceName": {
 					"referenceName": "AzureDatabricksPoc",
@@ -143,7 +143,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -177,7 +177,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -211,7 +211,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -245,7 +245,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Shared/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
