@@ -15,7 +15,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
 					"baseParameters": {
 						"dataFactory": {
 							"value": "@pipeline().DataFactory",
@@ -56,7 +56,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Insurance/Bronze/SP/InsertIntoPolicyInfo_Bronze",
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Bronze/SP/InsertIntoPolicyInfo_Bronze",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -89,7 +89,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Insurance/Silver/SP/GovernanceRulesforInsuranceInfo"
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/GovernanceRulesforInsuranceInfo"
 				},
 				"linkedServiceName": {
 					"referenceName": "AzureDatabricksPoc",
@@ -116,7 +116,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Insurance/Silver/SP/MergePolicyInfo"
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/MergePolicyInfo"
 				},
 				"linkedServiceName": {
 					"referenceName": "AzureDatabricksPoc",
@@ -143,7 +143,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -177,7 +177,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -211,7 +211,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
@@ -245,7 +245,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebookPath": "/Repos/rohita@contata.in/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+					"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
 					"baseParameters": {
 						"CreatedBy": {
 							"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
