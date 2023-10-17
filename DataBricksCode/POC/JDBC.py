@@ -11,7 +11,7 @@ dbutils.secrets.list(scope="AzureDataBricksScop")
 # JDBC URL of the database
 jdbc_url = "jdbc:sqlserver://ml-workspace.database.windows.net:1433;database=ML_Backup"
 # Table to read from
-table_name = "craiglistfile"
+table_name = "ME.MLMProspectList"
 User_Name = dbutils.secrets.get(scope = "AzureDataBricksScop", key = "AzureUserNameSecret")
 Password = dbutils.secrets.get(scope = "AzureDataBricksScop", key = "AzurePassword")
 
@@ -28,7 +28,11 @@ employees_table = (spark.read
 
 # COMMAND ----------
 
-display(employees_table).Head()
+employees_table.count()
+
+# COMMAND ----------
+
+display(employees_table)
 
 # COMMAND ----------
 
@@ -50,7 +54,3 @@ employees_table_pushdown = (spark.read
 # COMMAND ----------
 
 display(employees_table_pushdown)
-
-# COMMAND ----------
-
-
