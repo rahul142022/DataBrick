@@ -152,7 +152,90 @@ UPDATE FRM_Location
 
 -- COMMAND ----------
 
-SELECT * FROM FRM_Location where country = 'CAN'limit 10 
+-- MAGIC %python
+-- MAGIC table_name = "FRM_Location"
+
+-- COMMAND ----------
+
+SELECT AverageContractValue,*  FROM FRM_Location limit 10 
+
+-- AverageContractValue
+
+-- COMMAND ----------
+
+UPDATE FRM_Location
+SET GoodToImport  = 1
+ WHERE LocationId = '{E86F63A4-B793-EA11-80D5-000D3A1710FF}'
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC import pandas as pd
+-- MAGIC # Use DESCRIBE command to get information about the Delta table
+-- MAGIC describe_query = f"DESCRIBE {table_name}"
+-- MAGIC describe_results = spark.sql(describe_query)
+-- MAGIC
+-- MAGIC # Convert the describe results to a DataFrame
+-- MAGIC describe_df = describe_results.toPandas()
+-- MAGIC
+-- MAGIC # Date_Filter
+-- MAGIC Date_Filter = ['ModifiedOn','CreatedOn','AgreementRenewalDate','AgreementRenewalDate','ADADate', 'CerologistTrainingDate','CerologistTrainingDate','FeeStartDate','AdFeeStartDate','TechFeeStartDate','UnopenedStudioFeeStartDate','CharityFeeStartDate','LayoutApprovedDate','UnopenedClubFeeStartDate','MonthlyFeeStartDate']
+-- MAGIC describe_df_date = describe_df[describe_df['col_name'].isin(Date_Filter)]
+-- MAGIC describe_df_date['New_Data_Type'] = 'timestamp'
+-- MAGIC
+-- MAGIC # Int_Filter
+-- MAGIC Int_Filter = ['AverageContractValue']
+-- MAGIC describe_df_Int = describe_df[describe_df['col_name'].isin(Int_Filter)]
+-- MAGIC describe_df_Int['New_Data_Type'] = 'DECIMAL(19,6)'
+-- MAGIC ## Concat date Filter and Int filter
+-- MAGIC describe_results = pd.concat([describe_df_date, describe_df_Int],axis=0, ignore_index=True)
+-- MAGIC
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC from pyspark.sql.functions import lit
+-- MAGIC
+-- MAGIC flag_column_name = "GoodToImport"
+-- MAGIC Error_column_name = "Error"
+-- MAGIC
+-- MAGIC
+-- MAGIC for index, row in describe_results.iterrows():
+-- MAGIC     column_name = row['col_name']
+-- MAGIC     data_type = row['New_Data_Type']
+-- MAGIC     # print(data_type)
+-- MAGIC     sql  = f"""UPDATE {table_name} SET {flag_column_name} = 0 ,
+-- MAGIC                 {Error_column_name} = CONCAT({Error_column_name},'| Error Column Name is {column_name}')     
+-- MAGIC                 WHERE {column_name} IS NOT NULL AND 
+-- MAGIC                       TRY_CAST({column_name} AS {data_type}) IS NULL  AND  
+-- MAGIC                       {flag_column_name} = 1
+-- MAGIC             """ 
+-- MAGIC         # Update the flag column to 1 if the data type is valid
+-- MAGIC     spark.sql(sql)
+-- MAGIC
+
+-- COMMAND ----------
+
+SELECT * FROM FRM_Location WHERE GoodToImport = 0   
+
+-- COMMAND ----------
+
+			UPDATE FRM_Location
+			SET Status = 'Inactive'
+			WHERE LocationID = '{32599B72-C6DE-ED11-A89E-0022481C554E}'  AND 
+				 (SELECT COUNT(1) FROM FRM_Location WHERE LocationNumber = 'BCF10203') > 1;
+
+		UPDATE FRM_Location
+			SET  GoodToImport = 0
+					,Error = CONCAT(Error,' || NULL Location GUID')
+		WHERE  LocationID IS NULL 
+    
+
+
+
+-- COMMAND ----------
+
+
 
 -- COMMAND ----------
 
