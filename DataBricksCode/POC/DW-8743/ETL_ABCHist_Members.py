@@ -1,5 +1,4 @@
 # Databricks notebook source
-
 # Import Modules
 from pyspark.sql.functions import col, lit, current_timestamp
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
@@ -150,6 +149,20 @@ def Insert_ABC_Contract_Data_Into_Delta_Table():
 # MAGIC             ,Contracts[0]['SignDate']                AS  SignDate
 # MAGIC             ,Contracts[0]['Term']                    AS  Term
 # MAGIC             FROM Json_Data_Results
+
+# COMMAND ----------
+
+# MAGIC %sql 
+# MAGIC SELECT * FROM Json_Data_Results
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC SELECT *,Contract.*  FROM (
+# MAGIC SELECT        AgreementGuid
+# MAGIC             ,ClubGuid
+# MAGIC             ,VendorSyncDate, explode(Contracts)  AS Contract FROM Json_Data_Results
+# MAGIC )
 
 # COMMAND ----------
 
