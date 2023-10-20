@@ -17,7 +17,7 @@ Mode = dbutils.widgets.get("LogMode")
 
 LogFileName = "custom_log"
 file_date = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d-%H-%M-%S')
-p_dir = '/dbfs/test/'
+p_dir = 'dbfs/test/'
 p_filename = LogFileName + file_date+'.log'
 p_logfile = p_dir + p_filename 
 print(p_logfile)
@@ -28,7 +28,7 @@ print(p_logfile)
 
 logger = logging.getLogger('log4j')
 logger.setLevel(logging.DEBUG) 
-fh = logging.FileHandler('/dbfs/test/',mode='w')
+fh = logging.FileHandler('dbfs/test/',mode='w')
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -59,7 +59,7 @@ logging.shutdown()
 
 # COMMAND ----------
 
-df= spark.read.text('file:/dbfs/test')
+df= spark.read.text('file:/dbfs/test/')
 display(df)
 
 # COMMAND ----------
