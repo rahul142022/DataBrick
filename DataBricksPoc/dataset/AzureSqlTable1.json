@@ -1,0 +1,328 @@
+{
+	"name": "AzureSqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "JobID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "PersonID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "ProductID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "PostID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "TargetDate",
+				"type": "date"
+			},
+			{
+				"name": "FirstName",
+				"type": "varchar"
+			},
+			{
+				"name": "LastName",
+				"type": "varchar"
+			},
+			{
+				"name": "Address",
+				"type": "varchar"
+			},
+			{
+				"name": "Zip",
+				"type": "varchar"
+			},
+			{
+				"name": "Advantage_Home_Owner",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Advantage_Household_Size",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Advantage_Household_Marital_Status",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Advantage_Dwelling_Type",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Advantage_Length_of_Residence",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Advantage_Target_Income",
+				"type": "varchar"
+			},
+			{
+				"name": "Occupation",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Gender",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "City",
+				"type": "varchar"
+			},
+			{
+				"name": "State",
+				"type": "varchar"
+			},
+			{
+				"name": "Advantage_Individual_Marital_Status",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "Advantage_Individual_Age",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "Target_Net_Worth",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "metro_area",
+				"type": "varchar"
+			},
+			{
+				"name": "Geo_Division",
+				"type": "varchar"
+			},
+			{
+				"name": "pen",
+				"type": "varchar"
+			},
+			{
+				"name": "Age_74_Above_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_65_74_Year_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_55_64_Year_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_45_54_Year_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_35_44_Year_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_25_34_Year_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_18_24_Year_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Age_under_18_Percent",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "timetotravel",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Population",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "GoldenKey",
+				"type": "varchar"
+			},
+			{
+				"name": "GKID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Householdkey",
+				"type": "varchar"
+			},
+			{
+				"name": "HKID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Zip4",
+				"type": "varchar"
+			},
+			{
+				"name": "Age_74_above_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_65_74_Year_Old_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_55_64_Year_Old_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_45_54_Year_Old_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_35_44_Year_Old_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_25_34_Year_Old_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_18_24_Year_Old_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Age_under_18_Specific_",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SenderAddr",
+				"type": "varchar"
+			},
+			{
+				"name": "SenderID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Sender_lat",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Sender_long",
+				"type": "nvarchar"
+			},
+			{
+				"name": "score",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Criteria",
+				"type": "varchar"
+			},
+			{
+				"name": "PSMScore",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "IsControlGroup",
+				"type": "bit"
+			},
+			{
+				"name": "phone",
+				"type": "varchar"
+			},
+			{
+				"name": "AreaCode",
+				"type": "varchar"
+			},
+			{
+				"name": "IsSeed",
+				"type": "bit"
+			},
+			{
+				"name": "Decile",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PSM_Decile",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "IsIncremental",
+				"type": "bit"
+			},
+			{
+				"name": "PaymentWeek",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PaymentDate",
+				"type": "date"
+			},
+			{
+				"name": "Birthday_of_Person_with_Day",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Datasource",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "Staging",
+			"table": "CDCNEW"
+		}
+	}
+}
