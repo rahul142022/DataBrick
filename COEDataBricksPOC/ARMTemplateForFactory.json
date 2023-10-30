@@ -1,0 +1,4397 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "COEDataBricksPOC"
+		},
+		"AzureDatabricksDeltaLake1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake1'"
+		},
+		"AzureDatabricksPoc_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksPoc'"
+		},
+		"AzureSqlDatabase_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase'"
+		},
+		"AzureDatabricksPoc_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0724-065446-vderkx98"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DataBricks_poc')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Notebook1",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/Customers/Process/SP/InsertLogTaskcontrolFlow"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-09T11:05:07Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksPoc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Databricks_lookup')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureDatabricksDeltaLakeSource",
+								"query": "select * from logtaskcontrolflow"
+							},
+							"dataset": {
+								"referenceName": "AzureDatabricksDeltaLakeDataset1",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-09T11:05:07Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureDatabricksDeltaLakeDataset1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_GoldLayerDataLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "InsertLogtaskControlFlow",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
+							"baseParameters": {
+								"dataFactory": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								},
+								"Pipeline": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"startingActivity": "InsertLogtaskControlFlow",
+								"endingActivity": "ENT_LoadDataintoGoldLayer",
+								"Status": "InProgress",
+								"schemaName": {
+									"value": "@pipeline().parameters.schemaName",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_LoadDataintoGoldLayer",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "InsertLogtaskControlFlow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Gold/SP/MergeIsurance"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_LoadDataintoGoldLayer_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_LoadDataintoGoldLayer",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_LoadDataintoGoldLayer_Success",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_LoadDataintoGoldLayer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "0"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"schemaName": {
+						"type": "string",
+						"defaultValue": "Gold"
+					}
+				},
+				"variables": {
+					"LogtaskControlFlowKey": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "DataBricksPOCPipelines"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksPoc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_InsuranceAging')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ENT_InsertLogTaskControlflow",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
+							"baseParameters": {
+								"dataFactory": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								},
+								"schemaName": "Bronze",
+								"endingActivity": "ENT_InsertIntoAgingSilver",
+								"startingActivity": "ENT_InsertIntoAgingBronze",
+								"Pipeline": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"Status": "InProgress"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertIntoPolicyAging_Bronze",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertLogTaskControlflow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Bronze/SP/InsertIntoPolicyAging_Bronze",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_GovernanceRulesForPolicyAging",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertIntoPolicyAging_Bronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/GovernanceRulesForPolicyAging"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_MergePoliciyAging",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_GovernanceRulesForPolicyAging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/MergePoliciyAging"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertIntoPolicyAging_Bronze_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertIntoPolicyAging_Bronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_GovernanceRulesForPolicyAging_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_GovernanceRulesForPolicyAging",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_MergePoliciyAging_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_MergePoliciyAging",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_MergePoliciyAging_Success",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_MergePoliciyAging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "0"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"LogTaskControlFlowKey": {
+						"type": "String",
+						"defaultValue": "123"
+					}
+				},
+				"folder": {
+					"name": "DataBricksPOCPipelines"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksPoc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_InsuranceInfo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ENT_InsertLogTaskControlflow",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
+							"baseParameters": {
+								"dataFactory": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								},
+								"schemaName": "Silver",
+								"endingActivity": "ENT_MergePoliciyAging",
+								"startingActivity": "ENT_InsertIntoAgingBronze",
+								"Pipeline": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"Status": "InProgress"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertIntoPolicyInfo_Bronze",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertLogTaskControlflow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Bronze/SP/InsertIntoPolicyInfo_Bronze",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_GovernanceRulesForPolicyInfo",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertIntoPolicyInfo_Bronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/GovernanceRulesforInsuranceInfo"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_MergePolicyInfo",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_GovernanceRulesForPolicyInfo",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/MergePolicyInfo"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertIntoPolicyInfo_Bronze_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertIntoPolicyInfo_Bronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_GovernanceRulesForPolicyInfo_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_GovernanceRulesForPolicyInfo",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_MergePolicyInfo_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_MergePolicyInfo",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_MergePolicyInfo_Success",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_MergePolicyInfo",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('ENT_InsertLogTaskControlflow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "0"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"LogTaskControlFlowKey": {
+						"type": "String",
+						"defaultValue": "123"
+					}
+				},
+				"folder": {
+					"name": "DataBricksPOCPipelines"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksPoc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_MasterPipelinDatabricksPOC')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "InsertLogtaskControlFlow",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
+							"baseParameters": {
+								"dataFactory": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								},
+								"Pipeline": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"startingActivity": "InsertLogtaskControlFlow",
+								"endingActivity": "PL_GoldLayerDataLoad",
+								"Status": "InProgress",
+								"schemaName": {
+									"value": "@pipeline().parameters.schemaName",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PL_PolicyTransaction",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "InsertLogtaskControlFlow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_PolicyTransaction",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "PL_InsuranceAging",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_PolicyTransaction",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_InsuranceAging",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "PL_InsuranceInfo",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_InsuranceAging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_InsuranceInfo",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "PL_PolicyTransaction_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_PolicyTransaction",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PL_InsuranceAging_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_InsuranceAging",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PL_GoldLayerDataLoad",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PL_InsuranceInfo",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_GoldLayerDataLoad",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "PL_InsuranceInfo_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_InsuranceInfo",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PL_GoldLayerDataLoad_Success",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_GoldLayerDataLoad",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "0"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "PL_GoldLayerDataLoad_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "PL_GoldLayerDataLoad",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"schemaName": {
+						"type": "string",
+						"defaultValue": "Master"
+					}
+				},
+				"folder": {
+					"name": "DataBricksPOCPipelines"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksPoc')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_PolicyTransaction')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_InsuranceAging')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_InsuranceInfo')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_GoldLayerDataLoad')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_PolicyTransaction')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "InsertLogtaskControlFlow",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/InsertLogTaskcontrolFlow",
+							"baseParameters": {
+								"dataFactory": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								},
+								"Pipeline": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"startingActivity": "InsertLogtaskControlFlow",
+								"endingActivity": "ENT_InsertPolicyTransactionSilver",
+								"Status": "InProgress",
+								"schemaName": {
+									"value": "@pipeline().parameters.schemaName",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertIntoPolicyTransaction_Bronze",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "InsertLogtaskControlFlow",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Bronze/SP/InsertTransactionGrowthRate_Bronze",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_GovernanceruleForPolicyTransaction",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertIntoPolicyTransaction_Bronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/GovernanaceRulesforTransaction"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertPolicyTransactionSilver",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_GovernanceruleForPolicyTransaction",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Insurance/Silver/SP/MergeTransaction"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertIntoPolicyTransaction_Bronze_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertIntoPolicyTransaction_Bronze",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_GovernanceruleForPolicyTransaction_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_GovernanceruleForPolicyTransaction",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertPolicyTransactionSilver_Failed",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertPolicyTransactionSilver",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "Error"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "ENT_InsertPolicyTransactionSilver_Success",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "ENT_InsertPolicyTransactionSilver",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Repos/dhruvj@contata.com/DataBrick/DataBricksCode/Customers/Process/SP/UpdateLogtaskcotrolflow",
+							"baseParameters": {
+								"CreatedBy": {
+									"value": "@string(activity('InsertLogtaskControlFlow').output.runOutput)",
+									"type": "Expression"
+								},
+								"Error": "0"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksPoc",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"schemaName": {
+						"type": "string",
+						"defaultValue": "Silver"
+					}
+				},
+				"variables": {
+					"LogtaskControlFlowKey": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "DataBricksPOCPipelines"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksPoc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "Select * from Staging.CDC",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"PersonID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "JobID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "JobID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "PersonID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "PersonID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "ProductID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "PostID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "PostID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "TargetDate",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "TargetDate",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "FirstName",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "FirstName",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LastName",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "LastName",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Address",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Address",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Zip",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Zip",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Home_Owner",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Advantage_Home_Owner",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Household_Size",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Advantage_Household_Size",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Household_Marital_Status",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Advantage_Household_Marital_Status",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Dwelling_Type",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Advantage_Dwelling_Type",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Length_of_Residence",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Advantage_Length_of_Residence",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Target_Income",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Advantage_Target_Income",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Occupation",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Occupation",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Gender",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Gender",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Individual_Marital_Status",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Advantage_Individual_Marital_Status",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "Advantage_Individual_Age",
+											"type": "Int16",
+											"physicalType": "smallint"
+										},
+										"sink": {
+											"name": "Advantage_Individual_Age",
+											"type": "Int16",
+											"physicalType": "smallint"
+										}
+									},
+									{
+										"source": {
+											"name": "Target_Net_Worth",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										},
+										"sink": {
+											"name": "Target_Net_Worth",
+											"type": "Byte",
+											"physicalType": "tinyint"
+										}
+									},
+									{
+										"source": {
+											"name": "metro_area",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "metro_area",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Geo_Division",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Geo_Division",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "pen",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "pen",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_74_Above_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_74_Above_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_65_74_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_65_74_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_55_64_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_55_64_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_45_54_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_45_54_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_35_44_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_35_44_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_25_34_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_25_34_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_18_24_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_18_24_Year_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_under_18_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "Age_under_18_Percent",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "timetotravel",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "timetotravel",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Population",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Population",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "ID",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "ID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "GoldenKey",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "GoldenKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "GKID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "GKID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Householdkey",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Householdkey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "HKID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "HKID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Zip4",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Zip4",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_74_above_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_74_above_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_65_74_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_65_74_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_55_64_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_55_64_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_45_54_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_45_54_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_35_44_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_35_44_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_25_34_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_25_34_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_18_24_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_18_24_Year_Old_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Age_under_18_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Age_under_18_Specific_",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "SenderAddr",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "SenderAddr",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "SenderID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "SenderID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "Sender_lat",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "Sender_lat",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Sender_long",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "Sender_long",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "score",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "score",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "Criteria",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Criteria",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PSMScore",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "PSMScore",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "IsControlGroup",
+											"type": "Boolean",
+											"physicalType": "bit"
+										},
+										"sink": {
+											"name": "IsControlGroup",
+											"type": "Boolean",
+											"physicalType": "bit"
+										}
+									},
+									{
+										"source": {
+											"name": "phone",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "phone",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "AreaCode",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "AreaCode",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "IsSeed",
+											"type": "Boolean",
+											"physicalType": "bit"
+										},
+										"sink": {
+											"name": "IsSeed",
+											"type": "Boolean",
+											"physicalType": "bit"
+										}
+									},
+									{
+										"source": {
+											"name": "Decile",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Decile",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "PSM_Decile",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "PSM_Decile",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "IsIncremental",
+											"type": "Boolean",
+											"physicalType": "bit"
+										},
+										"sink": {
+											"name": "IsIncremental",
+											"type": "Boolean",
+											"physicalType": "bit"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentWeek",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "PaymentWeek",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentDate",
+											"type": "DateTime",
+											"physicalType": "date"
+										},
+										"sink": {
+											"name": "PaymentDate",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Birthday_of_Person_with_Day",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										},
+										"sink": {
+											"name": "Birthday_of_Person_with_Day",
+											"type": "DateTime",
+											"physicalType": "datetime"
+										}
+									},
+									{
+										"source": {
+											"name": "Datasource",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Datasource",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "create table ",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLakeDataset1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricksDeltaLake1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLakeDataset",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksDeltaLake1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "JobID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "PersonID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "ProductID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "PostID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "TargetDate",
+						"type": "date"
+					},
+					{
+						"name": "FirstName",
+						"type": "varchar"
+					},
+					{
+						"name": "LastName",
+						"type": "varchar"
+					},
+					{
+						"name": "Address",
+						"type": "varchar"
+					},
+					{
+						"name": "Zip",
+						"type": "varchar"
+					},
+					{
+						"name": "Advantage_Home_Owner",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Advantage_Household_Size",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Advantage_Household_Marital_Status",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Advantage_Dwelling_Type",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Advantage_Length_of_Residence",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Advantage_Target_Income",
+						"type": "varchar"
+					},
+					{
+						"name": "Occupation",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Gender",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "City",
+						"type": "varchar"
+					},
+					{
+						"name": "State",
+						"type": "varchar"
+					},
+					{
+						"name": "Advantage_Individual_Marital_Status",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "Advantage_Individual_Age",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "Target_Net_Worth",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "metro_area",
+						"type": "varchar"
+					},
+					{
+						"name": "Geo_Division",
+						"type": "varchar"
+					},
+					{
+						"name": "pen",
+						"type": "varchar"
+					},
+					{
+						"name": "Age_74_Above_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_65_74_Year_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_55_64_Year_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_45_54_Year_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_35_44_Year_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_25_34_Year_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_18_24_Year_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Age_under_18_Percent",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "timetotravel",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Population",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "GoldenKey",
+						"type": "varchar"
+					},
+					{
+						"name": "GKID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Householdkey",
+						"type": "varchar"
+					},
+					{
+						"name": "HKID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Zip4",
+						"type": "varchar"
+					},
+					{
+						"name": "Age_74_above_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_65_74_Year_Old_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_55_64_Year_Old_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_45_54_Year_Old_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_35_44_Year_Old_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_25_34_Year_Old_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_18_24_Year_Old_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Age_under_18_Specific_",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SenderAddr",
+						"type": "varchar"
+					},
+					{
+						"name": "SenderID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Sender_lat",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Sender_long",
+						"type": "nvarchar"
+					},
+					{
+						"name": "score",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Criteria",
+						"type": "varchar"
+					},
+					{
+						"name": "PSMScore",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "IsControlGroup",
+						"type": "bit"
+					},
+					{
+						"name": "phone",
+						"type": "varchar"
+					},
+					{
+						"name": "AreaCode",
+						"type": "varchar"
+					},
+					{
+						"name": "IsSeed",
+						"type": "bit"
+					},
+					{
+						"name": "Decile",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PSM_Decile",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "IsIncremental",
+						"type": "bit"
+					},
+					{
+						"name": "PaymentWeek",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PaymentDate",
+						"type": "date"
+					},
+					{
+						"name": "Birthday_of_Person_with_Day",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Datasource",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "Staging",
+					"table": "CDCNEW"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-191561761348454.14.azuredatabricks.net",
+					"clusterId": "0509-081304-25jn96gj",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksDeltaLake1_accessToken')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksPoc')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-5982132769542685.5.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksPoc_accessToken')]"
+					},
+					"existingClusterId": "[parameters('AzureDatabricksPoc_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adfcdc1')]",
+			"type": "Microsoft.DataFactory/factories/adfcdcs",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"SourceConnectionsInfo": [
+					{
+						"SourceEntities": [
+							{
+								"name": "staging.CDC",
+								"properties": {
+									"schema": [
+										{
+											"name": "JobID",
+											"dataType": "long"
+										},
+										{
+											"name": "PersonID",
+											"dataType": "long"
+										},
+										{
+											"name": "ProductID",
+											"dataType": "long"
+										},
+										{
+											"name": "PostID",
+											"dataType": "long"
+										},
+										{
+											"name": "TargetDate",
+											"dataType": "date"
+										},
+										{
+											"name": "FirstName",
+											"dataType": "string"
+										},
+										{
+											"name": "LastName",
+											"dataType": "string"
+										},
+										{
+											"name": "Address",
+											"dataType": "string"
+										},
+										{
+											"name": "Zip",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Home_Owner",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Household_Size",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Household_Marital_Status",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Dwelling_Type",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Length_of_Residence",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Target_Income",
+											"dataType": "string"
+										},
+										{
+											"name": "Occupation",
+											"dataType": "integer"
+										},
+										{
+											"name": "Gender",
+											"dataType": "integer"
+										},
+										{
+											"name": "City",
+											"dataType": "string"
+										},
+										{
+											"name": "State",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Individual_Marital_Status",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Individual_Age",
+											"dataType": "short"
+										},
+										{
+											"name": "Target_Net_Worth",
+											"dataType": "integer"
+										},
+										{
+											"name": "metro_area",
+											"dataType": "string"
+										},
+										{
+											"name": "Geo_Division",
+											"dataType": "string"
+										},
+										{
+											"name": "pen",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_Above_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_65_74_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_55_64_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_45_54_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_35_44_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_25_34_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_18_24_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_under_18_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "timetotravel",
+											"dataType": "integer"
+										},
+										{
+											"name": "Population",
+											"dataType": "integer"
+										},
+										{
+											"name": "ID",
+											"dataType": "integer"
+										},
+										{
+											"name": "GoldenKey",
+											"dataType": "string"
+										},
+										{
+											"name": "GKID",
+											"dataType": "long"
+										},
+										{
+											"name": "Householdkey",
+											"dataType": "string"
+										},
+										{
+											"name": "HKID",
+											"dataType": "long"
+										},
+										{
+											"name": "Zip4",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_above_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_65_74_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_55_64_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_45_54_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_35_44_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_25_34_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_18_24_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_under_18_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "SenderAddr",
+											"dataType": "string"
+										},
+										{
+											"name": "SenderID",
+											"dataType": "long"
+										},
+										{
+											"name": "Sender_lat",
+											"dataType": "string"
+										},
+										{
+											"name": "Sender_long",
+											"dataType": "string"
+										},
+										{
+											"name": "score",
+											"dataType": "double"
+										},
+										{
+											"name": "Criteria",
+											"dataType": "string"
+										},
+										{
+											"name": "PSMScore",
+											"dataType": "double"
+										},
+										{
+											"name": "IsControlGroup",
+											"dataType": "boolean"
+										},
+										{
+											"name": "phone",
+											"dataType": "string"
+										},
+										{
+											"name": "AreaCode",
+											"dataType": "string"
+										},
+										{
+											"name": "IsSeed",
+											"dataType": "boolean"
+										},
+										{
+											"name": "Decile",
+											"dataType": "integer"
+										},
+										{
+											"name": "PSM_Decile",
+											"dataType": "integer"
+										},
+										{
+											"name": "IsIncremental",
+											"dataType": "boolean"
+										},
+										{
+											"name": "PaymentWeek",
+											"dataType": "integer"
+										},
+										{
+											"name": "PaymentDate",
+											"dataType": "date"
+										},
+										{
+											"name": "Birthday_of_Person_with_Day",
+											"dataType": "timestamp"
+										},
+										{
+											"name": "Datasource",
+											"dataType": "string"
+										}
+									],
+									"dslConnectorProperties": [
+										{
+											"name": "schemaName",
+											"value": "staging"
+										},
+										{
+											"name": "tableName",
+											"value": "CDC"
+										},
+										{
+											"name": "enableNativeCdc",
+											"value": true
+										},
+										{
+											"name": "netChanges",
+											"value": true
+										},
+										{
+											"name": "allowSchemaDrift",
+											"value": false
+										},
+										{
+											"name": "inferDriftedColumnTypes",
+											"value": false
+										}
+									]
+								}
+							}
+						],
+						"Connection": {
+							"linkedService": {
+								"referenceName": "AzureSqlDatabase",
+								"type": "LinkedServiceReference"
+							},
+							"linkedServiceType": "AzureSqlDatabase",
+							"type": "linkedservicetype",
+							"isInlineDataset": true,
+							"commonDslConnectorProperties": [
+								{
+									"name": "allowSchemaDrift",
+									"value": true
+								},
+								{
+									"name": "inferDriftedColumnTypes",
+									"value": true
+								},
+								{
+									"name": "format",
+									"value": "table"
+								},
+								{
+									"name": "store",
+									"value": "sqlserver"
+								},
+								{
+									"name": "databaseType",
+									"value": "databaseType"
+								},
+								{
+									"name": "database",
+									"value": "database"
+								},
+								{
+									"name": "skipInitialLoad",
+									"value": true
+								}
+							]
+						}
+					}
+				],
+				"TargetConnectionsInfo": [
+					{
+						"TargetEntities": [
+							{
+								"name": "staging.CDCNEW",
+								"properties": {
+									"schema": [
+										{
+											"name": "JobID",
+											"dataType": "long"
+										},
+										{
+											"name": "PersonID",
+											"dataType": "long"
+										},
+										{
+											"name": "ProductID",
+											"dataType": "long"
+										},
+										{
+											"name": "PostID",
+											"dataType": "long"
+										},
+										{
+											"name": "TargetDate",
+											"dataType": "date"
+										},
+										{
+											"name": "FirstName",
+											"dataType": "string"
+										},
+										{
+											"name": "LastName",
+											"dataType": "string"
+										},
+										{
+											"name": "Address",
+											"dataType": "string"
+										},
+										{
+											"name": "Zip",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Home_Owner",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Household_Size",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Household_Marital_Status",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Dwelling_Type",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Length_of_Residence",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Target_Income",
+											"dataType": "string"
+										},
+										{
+											"name": "Occupation",
+											"dataType": "integer"
+										},
+										{
+											"name": "Gender",
+											"dataType": "integer"
+										},
+										{
+											"name": "City",
+											"dataType": "string"
+										},
+										{
+											"name": "State",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Individual_Marital_Status",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Individual_Age",
+											"dataType": "short"
+										},
+										{
+											"name": "Target_Net_Worth",
+											"dataType": "integer"
+										},
+										{
+											"name": "metro_area",
+											"dataType": "string"
+										},
+										{
+											"name": "Geo_Division",
+											"dataType": "string"
+										},
+										{
+											"name": "pen",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_Above_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_65_74_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_55_64_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_45_54_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_35_44_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_25_34_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_18_24_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_under_18_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "timetotravel",
+											"dataType": "integer"
+										},
+										{
+											"name": "Population",
+											"dataType": "integer"
+										},
+										{
+											"name": "ID",
+											"dataType": "integer"
+										},
+										{
+											"name": "GoldenKey",
+											"dataType": "string"
+										},
+										{
+											"name": "GKID",
+											"dataType": "long"
+										},
+										{
+											"name": "Householdkey",
+											"dataType": "string"
+										},
+										{
+											"name": "HKID",
+											"dataType": "long"
+										},
+										{
+											"name": "Zip4",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_above_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_65_74_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_55_64_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_45_54_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_35_44_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_25_34_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_18_24_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_under_18_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "SenderAddr",
+											"dataType": "string"
+										},
+										{
+											"name": "SenderID",
+											"dataType": "long"
+										},
+										{
+											"name": "Sender_lat",
+											"dataType": "string"
+										},
+										{
+											"name": "Sender_long",
+											"dataType": "string"
+										},
+										{
+											"name": "score",
+											"dataType": "double"
+										},
+										{
+											"name": "Criteria",
+											"dataType": "string"
+										},
+										{
+											"name": "PSMScore",
+											"dataType": "double"
+										},
+										{
+											"name": "IsControlGroup",
+											"dataType": "boolean"
+										},
+										{
+											"name": "phone",
+											"dataType": "string"
+										},
+										{
+											"name": "AreaCode",
+											"dataType": "string"
+										},
+										{
+											"name": "IsSeed",
+											"dataType": "boolean"
+										},
+										{
+											"name": "Decile",
+											"dataType": "integer"
+										},
+										{
+											"name": "PSM_Decile",
+											"dataType": "integer"
+										},
+										{
+											"name": "IsIncremental",
+											"dataType": "boolean"
+										},
+										{
+											"name": "PaymentWeek",
+											"dataType": "integer"
+										},
+										{
+											"name": "PaymentDate",
+											"dataType": "date"
+										},
+										{
+											"name": "Birthday_of_Person_with_Day",
+											"dataType": "timestamp"
+										},
+										{
+											"name": "Datasource",
+											"dataType": "string"
+										}
+									],
+									"dslConnectorProperties": [
+										{
+											"name": "schemaName",
+											"value": "staging"
+										},
+										{
+											"name": "tableName",
+											"value": "CDCNEW"
+										},
+										{
+											"name": "allowSchemaDrift",
+											"value": false
+										},
+										{
+											"name": "inferDriftedColumnTypes",
+											"value": false
+										},
+										{
+											"name": "keys",
+											"value": [
+												"PersonID"
+											]
+										},
+										{
+											"name": "deletable",
+											"value": true
+										},
+										{
+											"name": "updateable",
+											"value": true
+										},
+										{
+											"name": "upsertable",
+											"value": true
+										},
+										{
+											"name": "defaultToUpsert",
+											"value": true
+										}
+									]
+								}
+							}
+						],
+						"Connection": {
+							"linkedService": {
+								"referenceName": "AzureSqlDatabase",
+								"type": "LinkedServiceReference"
+							},
+							"linkedServiceType": "AzureSqlDatabase",
+							"type": "linkedservicetype",
+							"isInlineDataset": true,
+							"commonDslConnectorProperties": [
+								{
+									"name": "allowSchemaDrift",
+									"value": true
+								},
+								{
+									"name": "inferDriftedColumnTypes",
+									"value": true
+								},
+								{
+									"name": "format",
+									"value": "table"
+								},
+								{
+									"name": "store",
+									"value": "sqlserver"
+								},
+								{
+									"name": "databaseType",
+									"value": "databaseType"
+								},
+								{
+									"name": "database",
+									"value": "database"
+								},
+								{
+									"name": "deletable",
+									"value": false
+								},
+								{
+									"name": "insertable",
+									"value": true
+								},
+								{
+									"name": "updateable",
+									"value": false
+								},
+								{
+									"name": "upsertable",
+									"value": false
+								},
+								{
+									"name": "skipDuplicateMapInputs",
+									"value": true
+								},
+								{
+									"name": "skipDuplicateMapOutputs",
+									"value": true
+								}
+							]
+						},
+						"DataMapperMappings": [
+							{
+								"targetEntityName": "staging.CDCNEW",
+								"sourceEntityName": "staging.CDC",
+								"sourceConnectionReference": {
+									"connectionName": "AzureSqlDatabase",
+									"type": "linkedservicetype"
+								},
+								"attributeMappingInfo": {
+									"attributeMappings": [
+										{
+											"name": "Address",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Address",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Dwelling_Type",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Dwelling_Type",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Home_Owner",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Home_Owner",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Household_Marital_Status",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Household_Marital_Status",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Household_Size",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Household_Size",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Individual_Age",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Individual_Age",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Individual_Marital_Status",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Individual_Marital_Status",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Length_of_Residence",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Length_of_Residence",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Target_Income",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Target_Income",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_18_24_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_18_24_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_18_24_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_18_24_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_25_34_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_25_34_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_25_34_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_25_34_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_35_44_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_35_44_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_35_44_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_35_44_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_45_54_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_45_54_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_45_54_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_45_54_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_55_64_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_55_64_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_55_64_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_55_64_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_65_74_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_65_74_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_65_74_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_65_74_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_74_Above_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_74_Above_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_74_above_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_74_above_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_under_18_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_under_18_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_under_18_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_under_18_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "AreaCode",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "AreaCode",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Birthday_of_Person_with_Day",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Birthday_of_Person_with_Day",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "City",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "City",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Criteria",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Criteria",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Datasource",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Datasource",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Decile",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Decile",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "FirstName",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "FirstName",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Gender",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Gender",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Geo_Division",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Geo_Division",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "GKID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "GKID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "GoldenKey",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "GoldenKey",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "HKID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "HKID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Householdkey",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Householdkey",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "ID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "ID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "IsControlGroup",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "IsControlGroup",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "IsIncremental",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "IsIncremental",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "IsSeed",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "IsSeed",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "JobID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "JobID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "LastName",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "LastName",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "metro_area",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "metro_area",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Occupation",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Occupation",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PaymentDate",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PaymentDate",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PaymentWeek",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PaymentWeek",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "pen",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "pen",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PersonID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PersonID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "phone",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "phone",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Population",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Population",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PostID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PostID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "ProductID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "ProductID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PSM_Decile",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PSM_Decile",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PSMScore",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PSMScore",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "score",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "score",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Sender_lat",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Sender_lat",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Sender_long",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Sender_long",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "SenderAddr",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "SenderAddr",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "SenderID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "SenderID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "State",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "State",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Target_Net_Worth",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Target_Net_Worth",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "TargetDate",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "TargetDate",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "timetotravel",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "timetotravel",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Zip",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Zip",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Zip4",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Zip4",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										}
+									]
+								}
+							}
+						],
+						"Relationships": []
+					}
+				],
+				"Policy": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1
+					},
+					"mode": "Microbatch"
+				},
+				"allowVNetOverride": false
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		}
+	]
+}
