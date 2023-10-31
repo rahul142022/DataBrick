@@ -19,9 +19,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase'"
 		},
+		"cdctest_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'cdctest'"
+		},
+		"linkedService1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'linkedService1'"
+		},
 		"AzureDatabricksPoc_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0724-065446-vderkx98"
+		},
+		"cdctest_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsafpoc.dfs.core.windows.net/"
+		},
+		"linkedService1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsafpoc.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -73,6 +89,40 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureSqlDatabase_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cdctest')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('cdctest_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('cdctest_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/linkedService1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('linkedService1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('linkedService1_accountKey')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -3109,6 +3159,1330 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adfcdc2')]",
+			"type": "Microsoft.DataFactory/factories/adfcdcs",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"SourceConnectionsInfo": [
+					{
+						"SourceEntities": [
+							{
+								"name": "staging.CDC",
+								"properties": {
+									"schema": [
+										{
+											"name": "JobID",
+											"dataType": "long"
+										},
+										{
+											"name": "PersonID",
+											"dataType": "long"
+										},
+										{
+											"name": "ProductID",
+											"dataType": "long"
+										},
+										{
+											"name": "PostID",
+											"dataType": "long"
+										},
+										{
+											"name": "TargetDate",
+											"dataType": "date"
+										},
+										{
+											"name": "FirstName",
+											"dataType": "string"
+										},
+										{
+											"name": "LastName",
+											"dataType": "string"
+										},
+										{
+											"name": "Address",
+											"dataType": "string"
+										},
+										{
+											"name": "Zip",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Home_Owner",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Household_Size",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Household_Marital_Status",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Dwelling_Type",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Length_of_Residence",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Target_Income",
+											"dataType": "string"
+										},
+										{
+											"name": "Occupation",
+											"dataType": "integer"
+										},
+										{
+											"name": "Gender",
+											"dataType": "integer"
+										},
+										{
+											"name": "City",
+											"dataType": "string"
+										},
+										{
+											"name": "State",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Individual_Marital_Status",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Individual_Age",
+											"dataType": "short"
+										},
+										{
+											"name": "Target_Net_Worth",
+											"dataType": "integer"
+										},
+										{
+											"name": "metro_area",
+											"dataType": "string"
+										},
+										{
+											"name": "Geo_Division",
+											"dataType": "string"
+										},
+										{
+											"name": "pen",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_Above_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_65_74_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_55_64_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_45_54_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_35_44_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_25_34_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_18_24_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_under_18_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "timetotravel",
+											"dataType": "integer"
+										},
+										{
+											"name": "Population",
+											"dataType": "integer"
+										},
+										{
+											"name": "ID",
+											"dataType": "integer"
+										},
+										{
+											"name": "GoldenKey",
+											"dataType": "string"
+										},
+										{
+											"name": "GKID",
+											"dataType": "long"
+										},
+										{
+											"name": "Householdkey",
+											"dataType": "string"
+										},
+										{
+											"name": "HKID",
+											"dataType": "long"
+										},
+										{
+											"name": "Zip4",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_above_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_65_74_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_55_64_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_45_54_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_35_44_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_25_34_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_18_24_Year_Old_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "Age_under_18_Specific_",
+											"dataType": "integer"
+										},
+										{
+											"name": "SenderAddr",
+											"dataType": "string"
+										},
+										{
+											"name": "SenderID",
+											"dataType": "long"
+										},
+										{
+											"name": "Sender_lat",
+											"dataType": "string"
+										},
+										{
+											"name": "Sender_long",
+											"dataType": "string"
+										},
+										{
+											"name": "score",
+											"dataType": "double"
+										},
+										{
+											"name": "Criteria",
+											"dataType": "string"
+										},
+										{
+											"name": "PSMScore",
+											"dataType": "double"
+										},
+										{
+											"name": "IsControlGroup",
+											"dataType": "boolean"
+										},
+										{
+											"name": "phone",
+											"dataType": "string"
+										},
+										{
+											"name": "AreaCode",
+											"dataType": "string"
+										},
+										{
+											"name": "IsSeed",
+											"dataType": "boolean"
+										},
+										{
+											"name": "Decile",
+											"dataType": "integer"
+										},
+										{
+											"name": "PSM_Decile",
+											"dataType": "integer"
+										},
+										{
+											"name": "IsIncremental",
+											"dataType": "boolean"
+										},
+										{
+											"name": "PaymentWeek",
+											"dataType": "integer"
+										},
+										{
+											"name": "PaymentDate",
+											"dataType": "date"
+										},
+										{
+											"name": "Birthday_of_Person_with_Day",
+											"dataType": "timestamp"
+										},
+										{
+											"name": "Datasource",
+											"dataType": "string"
+										}
+									],
+									"dslConnectorProperties": [
+										{
+											"name": "schemaName",
+											"value": "staging"
+										},
+										{
+											"name": "tableName",
+											"value": "CDC"
+										},
+										{
+											"name": "enableNativeCdc",
+											"value": true
+										},
+										{
+											"name": "netChanges",
+											"value": true
+										},
+										{
+											"name": "allowSchemaDrift",
+											"value": false
+										},
+										{
+											"name": "inferDriftedColumnTypes",
+											"value": false
+										}
+									]
+								}
+							}
+						],
+						"Connection": {
+							"linkedService": {
+								"referenceName": "AzureSqlDatabase",
+								"type": "LinkedServiceReference"
+							},
+							"linkedServiceType": "AzureSqlDatabase",
+							"type": "linkedservicetype",
+							"isInlineDataset": true,
+							"commonDslConnectorProperties": [
+								{
+									"name": "allowSchemaDrift",
+									"value": true
+								},
+								{
+									"name": "inferDriftedColumnTypes",
+									"value": true
+								},
+								{
+									"name": "format",
+									"value": "table"
+								},
+								{
+									"name": "store",
+									"value": "sqlserver"
+								},
+								{
+									"name": "databaseType",
+									"value": "databaseType"
+								},
+								{
+									"name": "database",
+									"value": "database"
+								},
+								{
+									"name": "skipInitialLoad",
+									"value": true
+								}
+							]
+						}
+					}
+				],
+				"TargetConnectionsInfo": [
+					{
+						"TargetEntities": [
+							{
+								"name": "cdc/staging.CDC",
+								"properties": {
+									"schema": [],
+									"dslConnectorProperties": [
+										{
+											"name": "container",
+											"value": "cdc"
+										},
+										{
+											"name": "fileSystem",
+											"value": "cdc"
+										},
+										{
+											"name": "folderPath",
+											"value": "staging.CDC"
+										},
+										{
+											"name": "allowSchemaDrift",
+											"value": true
+										},
+										{
+											"name": "inferDriftedColumnTypes",
+											"value": true
+										}
+									]
+								}
+							}
+						],
+						"Connection": {
+							"linkedService": {
+								"referenceName": "cdctest",
+								"type": "LinkedServiceReference"
+							},
+							"linkedServiceType": "AzureBlobFS",
+							"type": "linkedservicetype",
+							"isInlineDataset": true,
+							"commonDslConnectorProperties": [
+								{
+									"name": "allowSchemaDrift",
+									"value": true
+								},
+								{
+									"name": "inferDriftedColumnTypes",
+									"value": true
+								},
+								{
+									"name": "format",
+									"value": "delimited"
+								},
+								{
+									"name": "columnNamesAsHeader",
+									"value": true
+								},
+								{
+									"name": "columnDelimiter",
+									"value": ","
+								},
+								{
+									"name": "escapeChar",
+									"value": "\\\\"
+								},
+								{
+									"name": "quoteChar",
+									"value": "\\\""
+								}
+							]
+						},
+						"DataMapperMappings": [
+							{
+								"targetEntityName": "cdc/staging.CDC",
+								"sourceEntityName": "staging.CDC",
+								"sourceConnectionReference": {
+									"connectionName": "AzureSqlDatabase",
+									"type": "linkedservicetype"
+								},
+								"attributeMappingInfo": {
+									"attributeMappings": [
+										{
+											"name": "Address",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Address",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Dwelling_Type",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Dwelling_Type",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Home_Owner",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Home_Owner",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Household_Marital_Status",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Household_Marital_Status",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Household_Size",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Household_Size",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Individual_Age",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Individual_Age",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Individual_Marital_Status",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Individual_Marital_Status",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Length_of_Residence",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Length_of_Residence",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Advantage_Target_Income",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Advantage_Target_Income",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_18_24_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_18_24_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_18_24_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_18_24_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_25_34_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_25_34_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_25_34_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_25_34_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_35_44_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_35_44_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_35_44_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_35_44_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_45_54_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_45_54_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_45_54_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_45_54_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_55_64_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_55_64_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_55_64_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_55_64_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_65_74_Year_Old_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_65_74_Year_Old_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_65_74_Year_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_65_74_Year_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_74_Above_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_74_Above_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_74_above_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_74_above_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_under_18_Percent",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_under_18_Percent",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Age_under_18_Specific_",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Age_under_18_Specific_",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "AreaCode",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "AreaCode",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Birthday_of_Person_with_Day",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Birthday_of_Person_with_Day",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "City",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "City",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Criteria",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Criteria",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Datasource",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Datasource",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Decile",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Decile",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "FirstName",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "FirstName",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Gender",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Gender",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Geo_Division",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Geo_Division",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "GKID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "GKID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "GoldenKey",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "GoldenKey",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "HKID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "HKID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Householdkey",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Householdkey",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "ID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "ID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "IsControlGroup",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "IsControlGroup",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "IsIncremental",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "IsIncremental",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "IsSeed",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "IsSeed",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "JobID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "JobID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "LastName",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "LastName",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "metro_area",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "metro_area",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Occupation",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Occupation",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PaymentDate",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PaymentDate",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PaymentWeek",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PaymentWeek",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "pen",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "pen",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PersonID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PersonID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "phone",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "phone",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Population",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Population",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PostID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PostID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "ProductID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "ProductID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PSM_Decile",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PSM_Decile",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "PSMScore",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "PSMScore",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "score",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "score",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Sender_lat",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Sender_lat",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Sender_long",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Sender_long",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "SenderAddr",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "SenderAddr",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "SenderID",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "SenderID",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "State",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "State",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Target_Net_Worth",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Target_Net_Worth",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "TargetDate",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "TargetDate",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "timetotravel",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "timetotravel",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Zip",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Zip",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										},
+										{
+											"name": "Zip4",
+											"type": "Direct",
+											"functionName": "",
+											"attributeReference": {
+												"name": "Zip4",
+												"entity": "staging.CDC",
+												"entityConnectionReference": {
+													"connectionName": "AzureSqlDatabase",
+													"type": "linkedservicetype"
+												}
+											}
+										}
+									]
+								}
+							}
+						],
+						"Relationships": []
+					}
+				],
+				"Policy": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 15
+					},
+					"mode": "Microbatch"
+				},
+				"allowVNetOverride": false
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]",
+				"[concat(variables('factoryId'), '/linkedServices/cdctest')]"
 			]
 		},
 		{

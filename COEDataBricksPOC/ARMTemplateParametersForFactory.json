@@ -14,8 +14,20 @@
 		"AzureSqlDatabase_connectionString": {
 			"value": ""
 		},
+		"cdctest_accountKey": {
+			"value": ""
+		},
+		"linkedService1_accountKey": {
+			"value": ""
+		},
 		"AzureDatabricksPoc_properties_typeProperties_existingClusterId": {
 			"value": "0724-065446-vderkx98"
+		},
+		"cdctest_properties_typeProperties_url": {
+			"value": "https://adlsafpoc.dfs.core.windows.net/"
+		},
+		"linkedService1_properties_typeProperties_url": {
+			"value": "https://adlsafpoc.dfs.core.windows.net/"
 		}
 	}
 }

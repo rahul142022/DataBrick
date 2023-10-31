@@ -19,9 +19,25 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase'"
 		},
+		"cdctest_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'cdctest'"
+		},
+		"linkedService1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'linkedService1'"
+		},
 		"AzureDatabricksPoc_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0724-065446-vderkx98"
+		},
+		"cdctest_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsafpoc.dfs.core.windows.net/"
+		},
+		"linkedService1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsafpoc.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -59,8 +75,20 @@
 					"AzureSqlDatabase_connectionString": {
 						"value": "[parameters('AzureSqlDatabase_connectionString')]"
 					},
+					"cdctest_accountKey": {
+						"value": "[parameters('cdctest_accountKey')]"
+					},
+					"linkedService1_accountKey": {
+						"value": "[parameters('linkedService1_accountKey')]"
+					},
 					"AzureDatabricksPoc_properties_typeProperties_existingClusterId": {
 						"value": "[parameters('AzureDatabricksPoc_properties_typeProperties_existingClusterId')]"
+					},
+					"cdctest_properties_typeProperties_url": {
+						"value": "[parameters('cdctest_properties_typeProperties_url')]"
+					},
+					"linkedService1_properties_typeProperties_url": {
+						"value": "[parameters('linkedService1_properties_typeProperties_url')]"
 					}
 				}
 			},
