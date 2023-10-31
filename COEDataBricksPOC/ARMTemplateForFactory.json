@@ -4798,7 +4798,7 @@
 					{
 						"TargetEntities": [
 							{
-								"name": "cdc/cdctest.csv",
+								"name": "cdc",
 								"properties": {
 									"schema": [
 										{
@@ -5080,10 +5080,6 @@
 											"value": "cdc"
 										},
 										{
-											"name": "folderPath",
-											"value": "cdctest.csv"
-										},
-										{
 											"name": "allowSchemaDrift",
 											"value": false
 										},
@@ -5136,7 +5132,7 @@
 						},
 						"DataMapperMappings": [
 							{
-								"targetEntityName": "cdc/cdctest.csv",
+								"targetEntityName": "cdc",
 								"sourceEntityName": "staging.CDC",
 								"sourceConnectionReference": {
 									"connectionName": "AzureSqlDatabase",
@@ -6025,7 +6021,7 @@
 				"Policy": {
 					"recurrence": {
 						"frequency": "Minute",
-						"interval": 15
+						"interval": 1
 					},
 					"mode": "Microbatch"
 				},
