@@ -4798,9 +4798,278 @@
 					{
 						"TargetEntities": [
 							{
-								"name": "cdc/staging.CDC",
+								"name": "cdc/cdctest.csv",
 								"properties": {
-									"schema": [],
+									"schema": [
+										{
+											"name": "JobID",
+											"dataType": "short"
+										},
+										{
+											"name": "PersonID",
+											"dataType": "integer"
+										},
+										{
+											"name": "ProductID",
+											"dataType": "boolean"
+										},
+										{
+											"name": "PostID",
+											"dataType": "short"
+										},
+										{
+											"name": "TargetDate",
+											"dataType": "date"
+										},
+										{
+											"name": "FirstName",
+											"dataType": "string"
+										},
+										{
+											"name": "LastName",
+											"dataType": "string"
+										},
+										{
+											"name": "Address",
+											"dataType": "string"
+										},
+										{
+											"name": "Zip",
+											"dataType": "integer"
+										},
+										{
+											"name": "Advantage_Home_Owner",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Household_Size",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Household_Marital_Status",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Dwelling_Type",
+											"dataType": "short"
+										},
+										{
+											"name": "Advantage_Length_of_Residence",
+											"dataType": "short"
+										},
+										{
+											"name": "Advantage_Target_Income",
+											"dataType": "string"
+										},
+										{
+											"name": "Occupation",
+											"dataType": "string"
+										},
+										{
+											"name": "Gender",
+											"dataType": "short"
+										},
+										{
+											"name": "City",
+											"dataType": "string"
+										},
+										{
+											"name": "State",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Individual_Marital_Status",
+											"dataType": "string"
+										},
+										{
+											"name": "Advantage_Individual_Age",
+											"dataType": "short"
+										},
+										{
+											"name": "Target_Net_Worth",
+											"dataType": "string"
+										},
+										{
+											"name": "metro_area",
+											"dataType": "string"
+										},
+										{
+											"name": "Geo_Division",
+											"dataType": "string"
+										},
+										{
+											"name": "pen",
+											"dataType": "string"
+										},
+										{
+											"name": "Age_74_Above_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_65_74_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_55_64_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_45_54_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_35_44_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_25_34_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_18_24_Year_Percent",
+											"dataType": "double"
+										},
+										{
+											"name": "Age_under_18_Percent",
+											"dataType": "boolean"
+										},
+										{
+											"name": "timetotravel",
+											"dataType": "short"
+										},
+										{
+											"name": "Population",
+											"dataType": "short"
+										},
+										{
+											"name": "ID",
+											"dataType": "integer"
+										},
+										{
+											"name": "GoldenKey",
+											"dataType": "string"
+										},
+										{
+											"name": "GKID",
+											"dataType": "integer"
+										},
+										{
+											"name": "Householdkey",
+											"dataType": "string"
+										},
+										{
+											"name": "HKID",
+											"dataType": "integer"
+										},
+										{
+											"name": "Zip4",
+											"dataType": "short"
+										},
+										{
+											"name": "Age_74_above_Specific_",
+											"dataType": "boolean"
+										},
+										{
+											"name": "Age_65_74_Year_Old_Specific_",
+											"dataType": "short"
+										},
+										{
+											"name": "Age_55_64_Year_Old_Specific_",
+											"dataType": "short"
+										},
+										{
+											"name": "Age_45_54_Year_Old_Specific_",
+											"dataType": "short"
+										},
+										{
+											"name": "Age_35_44_Year_Old_Specific_",
+											"dataType": "short"
+										},
+										{
+											"name": "Age_25_34_Year_Old_Specific_",
+											"dataType": "short"
+										},
+										{
+											"name": "Age_18_24_Year_Old_Specific_",
+											"dataType": "boolean"
+										},
+										{
+											"name": "Age_under_18_Specific_",
+											"dataType": "boolean"
+										},
+										{
+											"name": "SenderAddr",
+											"dataType": "string"
+										},
+										{
+											"name": "SenderID",
+											"dataType": "short"
+										},
+										{
+											"name": "Sender_lat",
+											"dataType": "string"
+										},
+										{
+											"name": "Sender_long",
+											"dataType": "string"
+										},
+										{
+											"name": "score",
+											"dataType": "double"
+										},
+										{
+											"name": "Criteria",
+											"dataType": "string"
+										},
+										{
+											"name": "PSMScore",
+											"dataType": "double"
+										},
+										{
+											"name": "IsControlGroup",
+											"dataType": "string"
+										},
+										{
+											"name": "phone",
+											"dataType": "string"
+										},
+										{
+											"name": "AreaCode",
+											"dataType": "string"
+										},
+										{
+											"name": "IsSeed",
+											"dataType": "string"
+										},
+										{
+											"name": "Decile",
+											"dataType": "short"
+										},
+										{
+											"name": "PSM_Decile",
+											"dataType": "short"
+										},
+										{
+											"name": "IsIncremental",
+											"dataType": "string"
+										},
+										{
+											"name": "PaymentWeek",
+											"dataType": "short"
+										},
+										{
+											"name": "PaymentDate",
+											"dataType": "date"
+										},
+										{
+											"name": "Birthday_of_Person_with_Day",
+											"dataType": "string"
+										},
+										{
+											"name": "Datasource",
+											"dataType": "string"
+										}
+									],
 									"dslConnectorProperties": [
 										{
 											"name": "container",
@@ -4812,15 +5081,15 @@
 										},
 										{
 											"name": "folderPath",
-											"value": "staging.CDC"
+											"value": "cdctest.csv"
 										},
 										{
 											"name": "allowSchemaDrift",
-											"value": true
+											"value": false
 										},
 										{
 											"name": "inferDriftedColumnTypes",
-											"value": true
+											"value": false
 										}
 									]
 								}
@@ -4867,7 +5136,7 @@
 						},
 						"DataMapperMappings": [
 							{
-								"targetEntityName": "cdc/staging.CDC",
+								"targetEntityName": "cdc/cdctest.csv",
 								"sourceEntityName": "staging.CDC",
 								"sourceConnectionReference": {
 									"connectionName": "AzureSqlDatabase",
@@ -5760,6 +6029,7 @@
 					},
 					"mode": "Microbatch"
 				},
+				"status": "Stopped",
 				"allowVNetOverride": false
 			},
 			"dependsOn": [
